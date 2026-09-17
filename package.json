@@ -2,18 +2,31 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "postinstall": "prisma generate",
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
+    "axios": "^1.20.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.12.1",
+    "path": "^0.12.7",
+    "pg": "^8.23.0",
+    "pg-pool": "^3.14.0",
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
