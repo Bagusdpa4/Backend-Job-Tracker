@@ -29,6 +29,7 @@ model JobApplication {
   company     String
   position    String
   status      String   @default("applied")
+  source      String?
   appliedDate DateTime
   notes       String?
   createdAt   DateTime @default(now())

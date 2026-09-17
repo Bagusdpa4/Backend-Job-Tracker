@@ -63,7 +63,7 @@ async function getById(req, res) {
 // POST /api/v1/applications
 async function create(req, res) {
   try {
-    const { company, position, status, appliedDate, notes } = req.body;
+    const { company, position, status, source, appliedDate, notes } = req.body;
 
     if (!company || !position || !appliedDate) {
       return res.status(400).json({
@@ -86,6 +86,7 @@ async function create(req, res) {
         company,
         position,
         status: status || "applied",
+        source,
         appliedDate: parseDateAsWIB(appliedDate),
         notes,
         userId: req.user.id,
@@ -109,7 +110,7 @@ async function create(req, res) {
 async function update(req, res) {
   try {
     const { id } = req.params;
-    const { company, position, status, appliedDate, notes } = req.body;
+    const { company, position, status, source, appliedDate, notes } = req.body;
 
     const existing = await prisma.jobApplication.findUnique({ where: { id } });
 
@@ -135,6 +136,7 @@ async function update(req, res) {
         company,
         position,
         status,
+        source,
         appliedDate: appliedDate ? parseDateAsWIB(appliedDate) : undefined,
         notes,
       },
