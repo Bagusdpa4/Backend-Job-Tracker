@@ -1,4 +1,5 @@
 const prisma = require("../libs/prisma");
+const { parseDateAsWIB } = require("../utils/date");
 
 const VALID_STATUSES = [
   "applied",
@@ -85,7 +86,7 @@ async function create(req, res) {
         company,
         position,
         status: status || "applied",
-        appliedDate: new Date(appliedDate),
+        appliedDate: parseDateAsWIB(appliedDate),
         notes,
         userId: req.user.id,
       },
@@ -134,7 +135,7 @@ async function update(req, res) {
         company,
         position,
         status,
-        appliedDate: appliedDate ? new Date(appliedDate) : undefined,
+        appliedDate: appliedDate ? parseDateAsWIB(appliedDate) : undefined,
         notes,
       },
     });
