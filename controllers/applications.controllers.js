@@ -1,5 +1,5 @@
 const prisma = require("../libs/prisma");
-const { parseDateAsWIB } = require("../utils/date");
+const { parseDateAsWIB, withWIBDate } = require("../utils/date");
 
 const VALID_STATUSES = [
   "applied",
@@ -21,7 +21,7 @@ async function getAll(req, res) {
     res.status(200).json({
       status: true,
       message: "Berhasil mengambil data lamaran",
-      data: applications,
+      data: applications.map(withWIBDate),
     });
   } catch (error) {
     console.error("Get all applications error:", error);
@@ -50,7 +50,7 @@ async function getById(req, res) {
     res.status(200).json({
       status: true,
       message: "Berhasil mengambil detail lamaran",
-      data: application,
+      data: withWIBDate(application),
     });
   } catch (error) {
     console.error("Get application by id error:", error);
@@ -95,7 +95,7 @@ async function create(req, res) {
     res.status(201).json({
       status: true,
       message: "Lamaran berhasil ditambahkan",
-      data: application,
+      data: withWIBDate(application),
     });
   } catch (error) {
     console.error("Create application error:", error);
@@ -143,7 +143,7 @@ async function update(req, res) {
     res.status(200).json({
       status: true,
       message: "Lamaran berhasil diperbarui",
-      data: application,
+      data: withWIBDate(application),
     });
   } catch (error) {
     console.error("Update application error:", error);
