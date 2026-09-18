@@ -13,7 +13,10 @@ const VALID_STATUSES = [
 // GET /api/v1/applications
 async function getAll(req, res) {
   try {
-    const { search, status, source } = req.query;
+    const { search, status, source, page, limit } = req.query;
+
+    const currentPage = Math.max(parseInt(page) || 1, 1);
+    const pageSize = 10;
 
     const where = {
       userId: req.user.id,
@@ -45,15 +48,26 @@ async function getAll(req, res) {
       ];
     }
 
+    const total = await prisma.jobApplication.count({ where });
+    const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+
     const applications = await prisma.jobApplication.findMany({
       where,
       orderBy: { appliedDate: "desc" },
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
     });
 
     res.status(200).json({
       status: true,
       message: "Berhasil mengambil data lamaran",
       data: applications.map(withWIBDate),
+      pagination: {
+        page: currentPage,
+        limit: pageSize,
+        total,
+        totalPages,
+      },
     });
   } catch (error) {
     console.error("Get all applications error:", error);
