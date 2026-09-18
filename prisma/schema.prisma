@@ -29,7 +29,9 @@ model JobApplication {
   company     String
   position    String
   status      String   @default("applied")
-  source      String?
+  source      String
+  city        String?
+  salaryRange String?
   appliedDate DateTime
   notes       String?
   createdAt   DateTime @default(now())

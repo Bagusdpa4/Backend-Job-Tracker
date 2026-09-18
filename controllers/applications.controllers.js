@@ -13,7 +13,17 @@ const VALID_STATUSES = [
 // GET /api/v1/applications
 async function getAll(req, res) {
   try {
-    const { search, status, source, page, limit, all } = req.query;
+    const {
+      search,
+      status,
+      source,
+      city,
+      startDate,
+      endDate,
+      page,
+      limit,
+      all,
+    } = req.query;
 
     const noPagination = all === "true" || all === "1";
 
@@ -38,6 +48,22 @@ async function getAll(req, res) {
 
     if (source) {
       where.source = { equals: source, mode: "insensitive" };
+    }
+
+    // Filter berdasarkan kota (opsional)
+    if (city) {
+      where.city = { contains: city, mode: "insensitive" };
+    }
+
+    // Filter berdasarkan rentang tanggal appliedDate (bukan createdAt)
+    if (startDate || endDate) {
+      where.appliedDate = {};
+      if (startDate) {
+        where.appliedDate.gte = parseDateAsWIB(startDate);
+      }
+      if (endDate) {
+        where.appliedDate.lte = parseDateAsWIB(endDate);
+      }
     }
 
     if (search) {
@@ -108,12 +134,22 @@ async function getById(req, res) {
 // POST /api/v1/applications
 async function create(req, res) {
   try {
-    const { company, position, status, source, appliedDate, notes } = req.body;
+    const {
+      company,
+      position,
+      status,
+      source,
+      city,
+      salaryRange,
+      appliedDate,
+      notes,
+    } = req.body;
 
-    if (!company || !position || !appliedDate) {
+    if (!company || !position || !appliedDate || !source) {
       return res.status(400).json({
         status: false,
-        message: "Company, position, dan appliedDate wajib diisi",
+        message:
+          "Nama Perusahaan, posisi, sumber dan tanggal lamaran kerja wajib diisi",
       });
     }
 
@@ -132,6 +168,8 @@ async function create(req, res) {
         position,
         status: status || "applied",
         source,
+        city,
+        salaryRange,
         appliedDate: parseDateAsWIB(appliedDate),
         notes,
         userId: req.user.id,
@@ -155,7 +193,16 @@ async function create(req, res) {
 async function update(req, res) {
   try {
     const { id } = req.params;
-    const { company, position, status, source, appliedDate, notes } = req.body;
+    const {
+      company,
+      position,
+      status,
+      source,
+      city,
+      salaryRange,
+      appliedDate,
+      notes,
+    } = req.body;
 
     const existing = await prisma.jobApplication.findUnique({ where: { id } });
 
@@ -182,6 +229,8 @@ async function update(req, res) {
         position,
         status,
         source,
+        city,
+        salaryRange,
         appliedDate: appliedDate ? parseDateAsWIB(appliedDate) : undefined,
         notes,
       },
