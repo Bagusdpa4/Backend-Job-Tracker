@@ -13,9 +13,41 @@ const VALID_STATUSES = [
 // GET /api/v1/applications
 async function getAll(req, res) {
   try {
+    const { search, status, source } = req.query;
+
+    const where = {
+      userId: req.user.id,
+    };
+
+    // Filter berdasarkan status
+    if (status) {
+      if (!VALID_STATUSES.includes(status)) {
+        return res.status(400).json({
+          status: false,
+          message: `Status tidak valid. Pilih salah satu: ${VALID_STATUSES.join(
+            ", "
+          )}`,
+        });
+      }
+      where.status = status;
+    }
+
+    // Filter berdasarkan source
+    if (source) {
+      where.source = { equals: source, mode: "insensitive" };
+    }
+
+    // Search berdasarkan company atau position
+    if (search) {
+      where.OR = [
+        { company: { contains: search, mode: "insensitive" } },
+        { position: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
     const applications = await prisma.jobApplication.findMany({
-      where: { userId: req.user.id },
-      orderBy: { createdAt: "desc" },
+      where,
+      orderBy: { appliedDate: "desc" },
     });
 
     res.status(200).json({
