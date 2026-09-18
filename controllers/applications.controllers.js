@@ -13,7 +13,9 @@ const VALID_STATUSES = [
 // GET /api/v1/applications
 async function getAll(req, res) {
   try {
-    const { search, status, source, page, limit } = req.query;
+    const { search, status, source, page, limit, all } = req.query;
+
+    const noPagination = all === "true" || all === "1";
 
     const currentPage = Math.max(parseInt(page) || 1, 1);
     const pageSize = 10;
@@ -22,7 +24,6 @@ async function getAll(req, res) {
       userId: req.user.id,
     };
 
-    // Filter berdasarkan status
     if (status) {
       if (!VALID_STATUSES.includes(status)) {
         return res.status(400).json({
@@ -35,12 +36,10 @@ async function getAll(req, res) {
       where.status = status;
     }
 
-    // Filter berdasarkan source
     if (source) {
       where.source = { equals: source, mode: "insensitive" };
     }
 
-    // Search berdasarkan company atau position
     if (search) {
       where.OR = [
         { company: { contains: search, mode: "insensitive" } },
@@ -49,25 +48,25 @@ async function getAll(req, res) {
     }
 
     const total = await prisma.jobApplication.count({ where });
-    const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+    const totalPages = noPagination
+      ? 1
+      : Math.max(Math.ceil(total / pageSize), 1);
 
     const applications = await prisma.jobApplication.findMany({
       where,
       orderBy: { appliedDate: "desc" },
-      skip: (currentPage - 1) * pageSize,
-      take: pageSize,
+      ...(noPagination
+        ? {}
+        : { skip: (currentPage - 1) * pageSize, take: pageSize }),
     });
 
     res.status(200).json({
       status: true,
       message: "Berhasil mengambil data lamaran",
       data: applications.map(withWIBDate),
-      pagination: {
-        page: currentPage,
-        limit: pageSize,
-        total,
-        totalPages,
-      },
+      pagination: noPagination
+        ? { page: 1, limit: total, total, totalPages: 1 }
+        : { page: currentPage, limit: pageSize, total, totalPages },
     });
   } catch (error) {
     console.error("Get all applications error:", error);
