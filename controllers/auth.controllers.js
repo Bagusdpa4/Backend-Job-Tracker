@@ -86,7 +86,7 @@ async function login(req, res) {
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET_KEY,
-      { expiresIn: "7d" }
+      { expiresIn: "2h" }
     );
 
     delete user.password;
